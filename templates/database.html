@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Marine Organism Database</title>
+
+  <!-- ✅ Flask static path for favicon -->
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}" />
+
+  <!-- ✅ Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    * {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: #00334e;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    .container {
+      width: 100%;
+      padding: 20px;
+      padding-top: 80px;
+    }
+
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 70px;
+      background-color: #002a44;
+      z-index: 1000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .navbar-inner {
+      width: 100%;
+      max-width: 1200px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 40px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 20px;
+      font-weight: 700;
+      color: #00bcd4;
+      cursor: pointer;
+      margin-left: -190px;
+    }
+
+    .logo img {
+      height: 42px;
+      width: 42px;
+      border-radius: 50%;
+      margin-left: 10px;
+    }
+
+    .navbar nav {
+      display: flex;
+      gap: 30px;
+      justify-content: center;
+      flex: 1;
+      margin-left: 10px;
+    }
+
+    .navbar nav a {
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+
+    .navbar nav a:hover {
+      color: #00bcd4;
+    }
+
+    .navbar nav a.active {
+      font-weight: bold;
+      border-bottom: 2px solid #00bcd4;
+      padding-bottom: 4px;
+      color: #00bcd4;
+    }
+
+    .auth-container {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .user-icon {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      overflow: hidden;
+      cursor: pointer;
+      position: relative;
+      left: 175px;
+    }
+
+    .user-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .search-container {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      max-width: 1200px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .search-container input,
+    .search-container select {
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+
+    .search-container input {
+      flex: 1 1 60%;
+      min-width: 200px;
+    }
+
+    .search-container select {
+      flex: 1 1 30%;
+      min-width: 150px;
+    }
+
+    .table-container {
+      overflow-x: auto;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      max-width: 1200px;
+      margin: 0 auto;
+      border: 1px solid #eee;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 14px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+
+    th {
+      background-color: #f4f6f9;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    td img {
+      width: 50px;
+      height: 50px;
+      object-fit: cover;
+      border-radius: 5px;
+    }
+
+    .type {
+      padding: 6px 12px;
+      border-radius: 15px;
+      color: white;
+      font-size: 13px;
+      display: inline-block;
+    }
+
+    .phytoplankton { background-color: #4caf50; }
+    .zooplankton { background-color: #f44336; }
+    .organic { background-color: #607d8b; }
+
+    .pagination {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .pagination button {
+      padding: 8px 16px;
+      background-color: #00bcd4;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .pagination button:hover { background-color: #0097a7; }
+    .pagination button:disabled { background-color: #ccc; cursor: not-allowed; }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <header class="navbar">
+      <div class="navbar-inner">
+        <!-- ✅ Flask version of logo with working click -->
+        <div class="logo" onclick="location.href='{{ url_for('home') }}'">
+          <img src="{{ url_for('static', filename='images/logo.png') }}" alt="AquaDex Logo" />
+          AquaDex
+        </div>
+
+        <nav>
+          <a href="{{ url_for('home') }}">Home</a>
+          <a href="{{ url_for('analysis_page') }}">Analysis</a>
+          <a href="{{ url_for('database') }}" class="active">Database</a>
+          <a href="{{ url_for('history') }}">History</a>
+        </nav>
+
+        <div class="auth-container" id="auth-container">
+          <a href="{{ url_for('history') }}" class="user-icon" title="Profile">
+            <img src="{{ url_for('static', filename='images/icon1.jpg') }}" alt="User Profile" />
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <div class="search-container">
+      <input type="text" placeholder="Search by species or genus..." />
+      <select>
+        <option value="all">All Types</option>
+        <option value="phytoplankton">Phytoplankton</option>
+        <option value="zooplankton">Zooplankton</option>
+        <option value="organic">Organic Matter</option>
+      </select>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Image</th>
+            <th>Species</th>
+            <th>Genus</th>
+            <th>Type</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><img src="{{ url_for('static', filename='images/chaetoceros.jpg') }}" alt="Chaetoceros" /></td>
+            <td>Chaetoceros</td>
+            <td>Chaetoceros</td>
+            <td><span class="type phytoplankton">Phytoplankton</span></td>
+          </tr>
+          <tr>
+            <td><img src="{{ url_for('static', filename='images/Skeletonema.jpg') }}" alt="Skeletonema" /></td>
+            <td>Skeletonema</td>
+            <td>Skeletonema</td>
+            <td><span class="type phytoplankton">Phytoplankton</span></td>
+          </tr>
+          <tr>
+            <td><img src="{{ url_for('static', filename='images/pseudonitzschia.jpg') }}" alt="Pseudo-nitzschia" /></td>
+            <td>Pseudo-nitzschia</td>
+            <td>Pseudo-nitzschia</td>
+            <td><span class="type phytoplankton">Phytoplankton</span></td>
+          </tr>
+          <tr>
+            <td><img src="{{ url_for('static', filename='images/ceratium-fusus.jpg') }}" alt="Ceratium fuses" /></td>
+            <td>Ceratium fuses</td>
+            <td>Ceratium</td>
+            <td><span class="type zooplankton">Zooplankton</span></td>
+          </tr>
+          <tr>
+            <td><img src="{{ url_for('static', filename='images/dino.webp') }}" alt="Dinoflagellate" /></td>
+            <td>Dinoflagellate unspec</td>
+            <td>Dinoflagellate</td>
+            <td><span class="type zooplankton">Zooplankton</span></td>
+          </tr>
+          <tr>
+            <td><img src="{{ url_for('static', filename='images/coscinodiscus.jpg') }}" alt="Coscinodiscus" /></td>
+            <td>Coscinodiscus</td>
+            <td>Coscinodiscus</td>
+            <td><span class="type phytoplankton">Phytoplankton</span></td>
+          </tr>
+          <tr>
+            <td><img src="{{ url_for('static', filename='images/large.jpg') }}" alt="Rhizosolenia" /></td>
+            <td>Rhizosolenia</td>
+            <td>Rhizosolenia</td>
+            <td><span class="type phytoplankton">Phytoplankton</span></td>
+          </tr>
+          <tr>
+            <td><img src="{{ url_for('static', filename='images/Dispersed-oildetritus.png') }}" alt="Detritus" /></td>
+            <td>Detritus</td>
+            <td>-</td>
+            <td><span class="type organic">Organic Matter</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pagination">
+      <button disabled>1</button>
+      <button>2</button>
+    </div>
+  </div>
+</body>
+</html>

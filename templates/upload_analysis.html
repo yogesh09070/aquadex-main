@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Analysis - AquaDex</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; background: #00334e; color: #fff; padding-top: 80px; }
+        
+        .navbar {
+            position: fixed; top: 0; left: 0; width: 100%; height: 70px;
+            background: #002a44; z-index: 1000; display: flex;
+            justify-content: space-between; align-items: center; padding: 0 40px;
+        }
+        .logo { display: flex; align-items: center; gap: 10px; font-size: 20px; font-weight: 700; color: #00bcd4; }
+        .logo img { height: 42px; width: 42px; border-radius: 50%; }
+        nav { display: flex; gap: 30px; }
+        nav a { color: white; text-decoration: none; font-weight: 500; transition: color 0.3s; }
+        nav a:hover, nav a.active { color: #00bcd4; }
+        
+        .auth-controls { display: flex; align-items: center; gap: 10px; }
+        .profile-container { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+        .profile-icon { width: 32px; height: 32px; border-radius: 50%; background: white; object-fit: cover; }
+        
+        .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+        .upload-section { text-align: center; margin-bottom: 40px; }
+        .upload-section h1 { font-size: 32px; margin-bottom: 10px; }
+        .upload-section p { color: #cfd8dc; margin-bottom: 30px; }
+        
+        .upload-area {
+            border: 2px dashed #00bcd4; border-radius: 12px; padding: 40px;
+            background: rgba(0, 188, 212, 0.1); cursor: pointer; transition: all 0.3s;
+            margin-bottom: 30px;
+        }
+        .upload-area:hover { background: rgba(0, 188, 212, 0.2); }
+        .upload-area.dragover { border-color: #fff; background: rgba(255, 255, 255, 0.1); }
+        
+        .upload-icon { font-size: 48px; margin-bottom: 20px; color: #00bcd4; }
+        .upload-text { font-size: 18px; margin-bottom: 10px; }
+        .upload-subtext { color: #cfd8dc; font-size: 14px; }
+        
+        .file-input { display: none; }
+        .upload-btn {
+            background: #00bcd4; color: #002a44; border: none; padding: 12px 24px;
+            border-radius: 6px; font-weight: 600; cursor: pointer; margin: 10px;
+            transition: all 0.3s;
+        }
+        .upload-btn:hover { background: #00acc1; transform: translateY(-2px); }
+        .upload-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        
+        .results-section { display: none; margin-top: 40px; }
+        .results-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 20px; }
+        .result-card {
+            background: rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+        .result-image { width: 100%; border-radius: 8px; margin-bottom: 15px; }
+        .detections-list { max-height: 300px; overflow-y: auto; }
+        .detection-item {
+            background: rgba(0, 188, 212, 0.1); border-radius: 8px; padding: 15px;
+            margin-bottom: 10px; display: flex; align-items: center; gap: 15px;
+        }
+        .detection-crop { width: 60px; height: 60px; border-radius: 6px; object-fit: cover; }
+        .detection-info h4 { margin-bottom: 5px; color: #00bcd4; }
+        .detection-info p { font-size: 14px; color: #cfd8dc; }
+        
+        .species-table {
+            width: 100%; border-collapse: collapse; margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.05); border-radius: 8px; overflow: hidden;
+        }
+        .species-table th, .species-table td {
+            padding: 10px; text-align: left; border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .species-table th {
+            background: rgba(0, 188, 212, 0.2); color: #00bcd4; font-weight: 600;
+        }
+        .species-table td { color: #fff; }
+        .total-count { 
+            font-size: 16px; font-weight: 600; color: #00bcd4; margin-bottom: 15px;
+        }
+        
+        .loading { display: none; text-align: center; padding: 40px; }
+        .spinner { border: 3px solid rgba(0, 188, 212, 0.3); border-top: 3px solid #00bcd4; 
+                  border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; 
+                  margin: 0 auto 20px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .error { background: rgba(244, 67, 54, 0.1); border: 1px solid #f44336; 
+                border-radius: 8px; padding: 15px; margin: 20px 0; color: #ffcdd2; }
+    </style>
+</head>
+<body>
+    <header class="navbar">
+        <div class="logo" onclick="location.href='{{ url_for('index') }}'">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="AquaDex Logo">
+            <span>AquaDex</span>
+        </div>
+        <nav style="position: absolute; left: 50%; transform: translateX(-50%);">
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('analysis_page') }}">Analysis</a>
+            <a href="{{ url_for('database') }}">Database</a>
+            <a href="{{ url_for('history') }}">History</a>
+        </nav>
+        <div class="auth-controls">
+            <div class="profile-container" onclick="location.href='{{ url_for('profile') }}'">
+                <img src="{{ url_for('static', filename='images/icon1.jpg') }}" alt="Profile" class="profile-icon">
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="upload-section">
+            <h1>Marine Organism Analysis</h1>
+            <p>Upload microscopic images to detect and classify marine organisms</p>
+            
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📁</div>
+                <div class="upload-text">Drop your image here or click to browse</div>
+                <div class="upload-subtext">Supports JPG, PNG files up to 50MB</div>
+                <input type="file" class="file-input" id="fileInput" accept=".jpg,.jpeg,.png">
+                <button class="upload-btn" id="uploadBtn">Choose File</button>
+            </div>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Analyzing image... This may take a few moments.</p>
+        </div>
+
+        <div class="error" id="error" style="display: none;"></div>
+
+        <div class="results-section" id="results">
+            <h2>Analysis Results</h2>
+            <div class="results-grid">
+                <div class="result-card">
+                    <h3>Processed Image</h3>
+                    <img class="result-image" id="processedImage" alt="Processed image">
+                </div>
+                <div class="result-card">
+                    <h3>Species Count</h3>
+                    <div id="speciesCount"></div>
+                    <h3 style="margin-top: 20px;">Detected Organisms</h3>
+                    <div class="detections-list" id="detectionsList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const loading = document.getElementById('loading');
+        const results = document.getElementById('results');
+        const error = document.getElementById('error');
+
+        // File upload handlers
+        uploadArea.addEventListener('click', () => fileInput.click());
+        uploadBtn.addEventListener('click', (e) => { e.stopPropagation(); fileInput.click(); });
+        
+        // Drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                uploadFile(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                uploadFile(e.target.files[0]);
+            }
+        });
+
+        async function uploadFile(file) {
+            if (!file.type.match(/image\/(jpeg|jpg|png)/)) {
+                showError('Please select a valid image file (JPG, PNG)');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            loading.style.display = 'block';
+            results.style.display = 'none';
+            error.style.display = 'none';
+
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Upload failed');
+                }
+
+                displayResults(data);
+            } catch (err) {
+                showError(err.message);
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+        function displayResults(data) {
+            const processedImage = document.getElementById('processedImage');
+            const detectionsList = document.getElementById('detectionsList');
+            const speciesCount = document.getElementById('speciesCount');
+
+            processedImage.src = `data:image/jpeg;base64,${data.processed_image}`;
+            
+            // Show mode message if applicable
+            if (data.demo_mode || data.simplified_mode || data.no_detection) {
+                const modeAlert = document.createElement('div');
+                let bgColor, borderColor, modeText;
+                
+                if (data.demo_mode) {
+                    bgColor = 'rgba(255, 193, 7, 0.1)';
+                    borderColor = '#ffc107';
+                    modeText = 'Demo Mode';
+                } else if (data.simplified_mode) {
+                    bgColor = 'rgba(33, 150, 243, 0.1)';
+                    borderColor = '#2196f3';
+                    modeText = 'Simplified Mode';
+                } else if (data.no_detection) {
+                    bgColor = 'rgba(255, 152, 0, 0.1)';
+                    borderColor = '#ff9800';
+                    modeText = 'No Detection';
+                }
+                
+                modeAlert.style.cssText = `background: ${bgColor}; border: 1px solid ${borderColor}; border-radius: 8px; padding: 15px; margin-bottom: 20px; color: #fff3cd;`;
+                modeAlert.innerHTML = `<strong>${modeText}:</strong> ${data.message}`;
+                document.getElementById('results').insertBefore(modeAlert, document.querySelector('.results-grid'));
+            }
+            
+            // Display species count table
+            if (data.total_organisms > 0) {
+                speciesCount.innerHTML = `
+                    <div class="total-count">Total Organisms: ${data.total_organisms}</div>
+                    <table class="species-table">
+                        <thead>
+                            <tr>
+                                <th>Species</th>
+                                <th>Count</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${Object.entries(data.species_count).map(([species, count]) => 
+                                `<tr><td>${species}</td><td>${count}</td></tr>`
+                            ).join('')}
+                        </tbody>
+                    </table>
+                `;
+            } else {
+                speciesCount.innerHTML = `
+                    <div class="total-count">Total Organisms: 0</div>
+                    <p style="color: #cfd8dc; font-style: italic;">No organisms detected in this image.</p>
+                `;
+            }
+            
+            detectionsList.innerHTML = '';
+            data.detections.forEach(detection => {
+                const item = document.createElement('div');
+                item.className = 'detection-item';
+                item.innerHTML = `
+                    <img class="detection-crop" src="data:image/jpeg;base64,${detection.crop_base64}" alt="${detection.label}">
+                    <div class="detection-info">
+                        <h4>${detection.label}</h4>
+                        <p>Confidence: ${(detection.confidence * 100).toFixed(1)}%</p>
+                        <p>Position: (${detection.x1}, ${detection.y1}) - (${detection.x2}, ${detection.y2})</p>
+                    </div>
+                `;
+                detectionsList.appendChild(item);
+            });
+
+            results.style.display = 'block';
+        }
+
+        function showError(message) {
+            error.textContent = message;
+            error.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

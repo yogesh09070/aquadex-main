@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en" class="dark-theme">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Analysis - AquaDex</title>
+
+  <!-- ✅ Flask static path for favicon -->
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}" />
+
+  <!-- ✅ Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet"/>
+
+  <!-- ✅ Link CSS files via Flask -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+
+  <!-- ✅ Link JS files via Flask -->
+  <script src="{{ url_for('static', filename='js/theme.js') }}" defer></script>
+
+  <style>
+    /* (Keep your inline CSS here as is — no change needed) */
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background-color: #00334e;
+      color: #fff;
+    }
+
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 70px;
+      background-color: #002a44;
+      z-index: 1000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .navbar-inner {
+      width: 100%;
+      max-width: 1200px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 40px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 20px;
+      font-weight: 700;
+      color: #00bcd4;
+      cursor: pointer;
+      margin-left: -150px;
+    }
+
+    .logo img {
+      height: 42px;
+      width: 42px;
+      border-radius: 50%;
+    }
+
+    .navbar nav {
+      display: flex;
+      gap: 30px;
+      justify-content: center;
+      flex: 1;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s;
+      position: relative;
+    }
+
+    nav a:hover {
+      color: #00bcd4;
+    }
+
+    nav a.active {
+      font-weight: bold;
+      border-bottom: 2px solid #00bcd4;
+      padding-bottom: 4px;
+      color: #00bcd4;
+    }
+
+    .auth-container {
+      display: flex;
+      align-items: center;
+    }
+
+    .user-icon {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      overflow: hidden;
+      position: relative;
+      right: -130px;
+    }
+
+    .user-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .analysis-section {
+      padding: 120px 20px 60px 20px;
+      text-align: center;
+    }
+
+    .analysis-section h2 {
+      font-size: 30px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 12px;
+    }
+
+    .analysis-section p {
+      font-size: 16px;
+      color: #cfd8dc;
+      margin-bottom: 40px;
+    }
+
+    .analysis-cards {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+
+    .analysis-card {
+      background: #e6f0fa;
+      color: #00334e;
+      padding: 30px;
+      width: 320px;
+      border-radius: 12px;
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      text-align: center;
+      position: relative;
+    }
+
+    .analysis-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .analysis-card h3 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: #002a44;
+    }
+
+    .analysis-card p {
+      font-size: 14px;
+      color: #37474f;
+      margin-bottom: 20px;
+    }
+
+    .analysis-card button {
+      background: #002a44;
+      color: #ffffff;
+      border: none;
+      padding: 12px 24px;
+      font-size: 15px;
+      font-weight: 500;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background 0.3s ease, transform 0.2s ease;
+    }
+
+    .analysis-card button:hover {
+      background: #00bcd4;
+      color: #002a44;
+      transform: scale(1.05);
+    }
+
+    .capture-btn {
+      background: #00bcd4;
+      color: #002a44;
+    }
+
+    .capture-btn:hover {
+      background: #002a44;
+      color: #ffffff;
+    }
+  </style>
+</head>
+
+<body>
+  <header class="navbar">
+    <div class="navbar-inner">
+      <!-- ✅ Flask URL for navigation -->
+      <div class="logo" onclick="location.href='{{ url_for('home') }}'">
+
+
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="AquaDex Logo" />
+        <span>AquaDex</span>
+      </div>
+
+      <nav>
+        <a href="{{ url_for('home') }}">Home</a>
+        <a href="{{ url_for('analysis_page') }}" class="active">Analysis</a>
+        <a href="{{ url_for('database') }}">Database</a>
+        <a href="{{ url_for('history') }}">History</a>
+      </nav>
+
+      <div class="auth-container" id="auth-container">
+        <!-- ✅ Flask image path -->
+        <a href="{{ url_for('history') }}" class="user-icon" title="Profile">
+          <img src="{{ url_for('static', filename='images/icon1.jpg') }}" alt="User Profile" />
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <section class="analysis-section">
+    <h2>Marine Organism Detection &amp; Analysis</h2>
+    <p>Upload microscopic images or capture new samples to identify marine organisms</p>
+
+    <div class="analysis-cards">
+      <div class="analysis-card">
+        <h3>Upload Microscopic Image</h3>
+        <p>Upload existing microscopic images for organism detection and analysis</p>
+
+        <button id="continueBtn" onclick="location.href='{{ url_for('upload_analysis') }}'">Continue</button>
+      </div>
+
+      <div class="analysis-card">
+        <h3>Capture Sample</h3>
+        <p>Connect to microscope camera to capture live samples for real-time analysis</p>
+        <button class="capture-btn">Start Capture</button>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const continueBtn = document.getElementById('continueBtn');
+      if (continueBtn) {
+        continueBtn.addEventListener('click', function (e) {
+          e.preventDefault();
+          window.location.href = "{{ url_for('upload_analysis') }}";
+        });
+      }
+    });
+  </script>
+</body>
+</html>

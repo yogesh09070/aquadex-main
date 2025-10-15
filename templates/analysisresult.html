@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en" class="dark-theme">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis Results</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="stylesheet" href="theme.css">
+    <script src="theme.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.16.0/dist/ort.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #00334e;
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 50px;
+            background-color: #002a44;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            box-sizing: border-box;
+        }
+        
+        .navbar .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 20px;
+            color: #00bcd4;
+            flex: 1;
+        }
+
+        .navbar .logo img {
+            height: 42px;
+            width: 42px;
+            border-radius: 50%;
+        }
+
+        .navbar nav {
+            display: flex;
+            gap: 25px;
+            flex: 9;
+            justify-content: center;
+        }
+
+        .navbar nav a {
+            text-decoration: none;
+            color: #ffffff;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .navbar nav a:hover {
+            color: #00bcd4;
+        }
+
+        .navbar nav a.active {
+            border-bottom: 2px solid #00bcd4;
+            padding-bottom: 4px;
+            color: #00bcd4;
+        }
+
+        .navbar .auth-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 100px auto 20px auto;
+            padding: 0 20px;
+        }
+        
+        .card {
+            background: #e6f0fa;
+            color: #00334e;
+            border-radius: 12px;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+            padding: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #002a44;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+
+        .upload-section .upload-box {
+            border: 2px dashed #00bcd4;
+            border-radius: 8px;
+            text-align: center;
+            padding: 40px 20px;
+            color: #37474f;
+        }
+
+        .upload-icon {
+            margin-bottom: 10px;
+        }
+
+        .upload-box p {
+            margin: 0;
+            font-size: 1rem;
+            color: #00334e;
+        }
+
+        .or-text {
+            font-size: 0.875rem;
+        }
+
+        .support-text {
+            font-size: 0.75rem;
+            color: #78909c;
+            margin-top: 15px;
+        }
+
+        .btn-primary {
+            background-color: #002a44;
+            color: #ffffff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            margin-top: 15px;
+            transition: background 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background: #00bcd4;
+            color: #002a44;
+        }
+
+        .results-section {
+            display: none;
+        }
+
+        .results-section.show {
+            display: block;
+        }
+
+        .processed-container {
+            display: flex;
+            gap: 24px;
+            align-items: flex-start;
+        }
+
+        .processed-image-box {
+            flex: 1 1 50%;
+            background-color: #002a44;
+            border-radius: 8px;
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #processedImage {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .image-placeholder {
+            text-align: center;
+            color: #cfd8dc;
+            padding: 20px;
+        }
+
+        .image-placeholder p {
+            font-size: 0.875rem;
+            margin-top: 10px;
+        }
+
+        .species-detected {
+            flex: 1 1 40%;
+            min-width: 300px;
+            text-align: left;
+        }
+        
+        .table-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #002a44;
+            margin-bottom: 10px;
+        }
+
+        .species-detected table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .species-detected th, .species-detected td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 0.875rem;
+        }
+
+        .species-detected th {
+            background-color: #f0f0f0;
+            font-weight: 600;
+            color: #00334e;
+        }
+
+        .species-detected tr:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .species-detected td {
+            color: #00334e;
+        }
+
+        .species-detected td:first-child {
+            width: 50px;
+        }
+
+        .species-detected td:first-child img {
+            width: 40px;
+            height: 40px;
+            border-radius: 4px;
+            object-fit: cover;
+        }
+
+        .table-summary {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            font-size: 0.8rem;
+            color: #78909c;
+        }
+
+        @media (max-width: 768px) {
+            .processed-container {
+                flex-direction: column;
+            }
+            .processed-image-box {
+                min-height: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="navbar">
+        <div class="logo">
+            <img src="logo.png" alt="AquaDex Logo">
+            <span>AquaDex</span>
+        </div>
+          
+        <nav>
+            <a href="home.html">Home</a>
+            <a href="analysisresult.html" class="active">Analysis</a>
+            <a href="database.html">Database</a>
+            <a href="history.html">History</a>
+        </nav>
+        <div id="auth-container" class="auth-container"></div>
+    </header>
+
+    <div class="container">
+        <div class="card upload-section">
+            <h3 class="card-title">Upload Media</h3>
+            <div class="upload-box" id="drop-area">
+                <div class="upload-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="#00bcd4" viewBox="0 0 24 24">
+                        <path d="M19 13v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2zM12 2l-6 6h4v4h4V8h4l-6-6z"/>
+                    </svg>
+                </div>
+                <p>Drag and drop your files here</p>
+                <p class="or-text">or click to browse</p>
+                <input type="file" id="fileInput" multiple accept="image/jpeg,image/png" style="display: none;">
+                <button class="btn-primary" id="chooseFileBtn">Choose Files</button>
+                <p class="support-text">Supports: JPG, PNG (max 50MB)</p>
+            </div>
+        </div>
+
+        <div class="card results-section" id="results-card">
+            <h3 class="card-title">Analysis Results</h3>
+            <div class="processed-container">
+                <div class="processed-image-box">
+                    <img id="processedImage" alt="Processed image">
+                    <div class="image-placeholder" id="imagePlaceholder">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="#00bcd4" viewBox="0 0 24 24">
+                            <path d="M19 5v14H5V5h14m0-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                        </svg>
+                        <p>Processed image with detected species will appear here</p>
+                    </div>
+                </div>
+                
+                <div class="species-detected">
+                    <h4 class="table-title">Species Detected</h4>
+                    <table id="speciesTable">
+                        <thead>
+                            <tr>
+                                <th>Image</th>
+                                <th>Species</th>
+                                <th>Predicted</th>
+                                <th>Count</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                    <div class="table-summary">
+                        <span id="totalSpecies">Total species detected: 0</span>
+                        <span id="totalOrganisms">Total organisms counted: 0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const CLASS_NAMES = [
+            "Chaetoceros_didymus",
+            "Chaetoceros_flagellate",
+            "Chaetoceros_other",
+            "Chaetoceros_pennate",
+            "Coscinodiscus",
+            "Tintinnid"
+        ];
+
+        const COLORS = [
+            [255, 0, 0],      // Red
+            [0, 255, 0],      // Green
+            [0, 0, 255],      // Blue
+            [255, 255, 0],    // Yellow
+            [255, 0, 255],    // Magenta
+            [0, 255, 255]     // Cyan
+        ];
+
+        let yoloSession = null;
+        let arcfaceSession = null;
+        let W_MATRIX = null;
+
+        // DOM Elements
+        const dropArea = document.getElementById('drop-area');
+        const fileInput = document.getElementById('fileInput');
+        const chooseFileBtn = document.getElementById('chooseFileBtn');
+        const resultsCard = document.getElementById('results-card');
+        const processedImage = document.getElementById('processedImage');
+        const imagePlaceholder = document.getElementById('imagePlaceholder');
+        const speciesTableBody = document.querySelector('#speciesTable tbody');
+        const totalSpeciesSpan = document.getElementById('totalSpecies');
+        const totalOrganismsSpan = document.getElementById('totalOrganisms');
+        const authContainer = document.getElementById('auth-container');
+
+        // Load W matrix
+        async function loadWMatrix() {
+            try {
+                const response = await fetch('models/W.json');
+                const W_data = await response.json();
+                W_MATRIX = new Float32Array(W_data);
+                console.log("✅ W matrix loaded");
+            } catch (error) {
+                console.error("Failed to load W.json:", error);
+                alert("Error: W.json not found. Please ensure models/W.json exists and you're serving via http://localhost.");
+            }
+        }
+
+        // Load ONNX models
+        async function loadModels() {
+            try {
+                console.log("Loading YOLO model...");
+                yoloSession = await ort.InferenceSession.create('models/best.onnx');
+                console.log("Loading ArcFace model...");
+                arcfaceSession = await ort.InferenceSession.create('models/arcface.onnx');
+                await loadWMatrix();
+                console.log("✅ All models loaded successfully!");
+            } catch (error) {
+                console.error("Model loading failed:", error);
+                console.error("Detailed error:", error.message, error.stack); // Log more details
+                alert(`Failed to load models. Check console for details. Error: ${error.message}`); // Show error message to user
+
+            }
+        }
+
+        // Auth
+        function checkLoginStatus() {
+            const user = localStorage.getItem('loggedInUser');
+            if (user) {
+                authContainer.innerHTML = `
+                    <span class="welcome-text">Welcome, ${user}</span>
+                    <a href="#" class="log-out-btn">Log Out</a>
+                `;
+                document.querySelector('.log-out-btn').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    localStorage.removeItem('loggedInUser');
+                    window.location.reload();
+                });
+            }
+        }
+
+        // Drag & Drop
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, e => {
+                e.preventDefault();
+                e.stopPropagation();
+            });
+        });
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, () => dropArea.classList.add('highlight'));
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, () => dropArea.classList.remove('highlight'));
+        });
+
+        dropArea.addEventListener('drop', (e) => {
+            const files = e.dataTransfer.files;
+            handleFiles(files);
+        });
+
+        chooseFileBtn.addEventListener('click', () => fileInput.click());
+        dropArea.addEventListener('click', (e) => {
+            if (!e.target.closest('#chooseFileBtn')) fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
+
+        // Main inference
+        async function handleFiles(files) {
+            if (!files || files.length === 0 || !yoloSession || !W_MATRIX) return;
+
+            const file = files[0];
+            if (!file.type.match('image.*')) {
+                alert("Please upload an image (JPG/PNG).");
+                return;
+            }
+
+            resultsCard.classList.add('show');
+            imagePlaceholder.style.display = 'none';
+            processedImage.style.display = 'block';
+
+            const img = new Image();
+            img.onload = async () => {
+                // Preprocess for YOLO: resize to 640x640, normalize to [0,1]
+                const resizedCanvas = document.createElement('canvas');
+                const ctx = resizedCanvas.getContext('2d');
+                resizedCanvas.width = 640;
+                resizedCanvas.height = 640;
+                ctx.drawImage(img, 0, 0, 640, 640);
+
+                const imageData = ctx.getImageData(0, 0, 640, 640);
+                const data = imageData.data;
+                const tensor = new Float32Array(640 * 640 * 3);
+
+                for (let i = 0; i < 640 * 640; i++) {
+                    tensor[i] = data[i * 4] / 255.0;           // R
+                    tensor[i + 640 * 640] = data[i * 4 + 1] / 255.0; // G
+                    tensor[i + 2 * 640 * 640] = data[i * 4 + 2] / 255.0; // B
+                }
+
+                const inputTensor = new ort.Tensor('float32', tensor, [1, 3, 640, 640]);
+                const yoloResults = await yoloSession.run({ images: inputTensor });
+                const output = yoloResults.output0.data; // YOLOv8 ONNX uses 'output0'
+
+                const boxes = [];
+                const CONF_THRESH = 0.25;
+                const IMG_SIZE = 640;
+
+                for (let i = 0; i < output.length; i += 85) {
+                    const conf = output[i + 4];
+                    if (conf < CONF_THRESH) continue;
+
+                    const x1 = (output[i] / IMG_SIZE) * img.width;
+                    const y1 = (output[i + 1] / IMG_SIZE) * img.height;
+                    const x2 = (output[i + 2] / IMG_SIZE) * img.width;
+                    const y2 = (output[i + 3] / IMG_SIZE) * img.height;
+
+                    boxes.push({ x1, y1, x2, y2, confidence: conf });
+                }
+
+                if (boxes.length === 0) {
+                    alert("No plankton detected. Try a clearer image.");
+                    return;
+                }
+
+                // Classify each box
+                for (const box of boxes) {
+                    const cropCanvas = document.createElement('canvas');
+                    const cropCtx = cropCanvas.getContext('2d');
+                    const w = box.x2 - box.x1;
+                    const h = box.y2 - box.y1;
+                    cropCanvas.width = w;
+                    cropCanvas.height = h;
+                    cropCtx.drawImage(img, box.x1, box.y1, w, h, 0, 0, w, h);
+
+                    // Resize crop to 224x224
+                    const resizedCrop = document.createElement('canvas');
+                    const rcCtx = resizedCrop.getContext('2d');
+                    resizedCrop.width = 224;
+                    resizedCrop.height = 224;
+                    rcCtx.drawImage(cropCanvas, 0, 0, 224, 224);
+
+                    const cropData = rcCtx.getImageData(0, 0, 224, 224);
+                    const pixels = cropData.data;
+                    const cropTensor = new Float32Array(224 * 224 * 3);
+
+                    for (let i = 0; i < 224 * 224; i++) {
+                        cropTensor[i] = (pixels[i * 4] / 255 - 0.485) / 0.229;
+                        cropTensor[i + 224 * 224] = (pixels[i * 4 + 1] / 255 - 0.456) / 0.224;
+                        cropTensor[i + 2 * 224 * 224] = (pixels[i * 4 + 2] / 255 - 0.406) / 0.225;
+                    }
+
+                    const cropInput = new ort.Tensor('float32', cropTensor, [1, 3, 224, 224]);
+                    const arcfaceResults = await arcfaceSession.run({ input: cropInput });
+                    const embeddings = arcfaceResults.embeddings.data;
+
+                    // Cosine similarity with real W
+                    let maxSim = -Infinity;
+                    let bestCls = 0;
+                    for (let cls = 0; cls < 6; cls++) {
+                        let dot = 0;
+                        for (let i = 0; i < 128; i++) {
+                            dot += embeddings[i] * W_MATRIX[i * 6 + cls];
+                        }
+                        if (dot > maxSim) {
+                            maxSim = dot;
+                            bestCls = cls;
+                        }
+                    }
+
+                    box.clsId = bestCls;
+                    box.label = CLASS_NAMES[bestCls];
+                    box.confidence = maxSim;
+                }
+
+                // Draw results
+                const resultCanvas = document.createElement('canvas');
+                const resultCtx = resultCanvas.getContext('2d');
+                resultCanvas.width = img.width;
+                resultCanvas.height = img.height;
+                resultCtx.drawImage(img, 0, 0);
+
+                for (const box of boxes) {
+                    const color = COLORS[box.clsId];
+                    resultCtx.strokeStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+                    resultCtx.lineWidth = 2;
+                    resultCtx.strokeRect(box.x1, box.y1, box.x2 - box.x1, box.y2 - box.y1);
+                    resultCtx.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+                    resultCtx.font = '14px Arial';
+                    resultCtx.fillText(`${box.label} ${box.confidence.toFixed(2)}`, box.x1, box.y1 - 5);
+                }
+
+                // Display result
+                try {
+                    const imageDataURL = resultCanvas.toDataURL();
+                    if (!imageDataURL) throw new Error("Failed to generate image data URL");
+                    processedImage.src = imageDataURL;
+                } catch (error) {
+                    console.error("Image generation failed:", error);
+                    processedImage.src = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0OCIgaGVpZ2h0PSI0OCIgdmlld0JveD0iMCAwIDQ4IDQ4Ij48cGF0aCBkPSJNMTkgNWgtMTJhMiAyIDAgMDAwLTJ2MTRoMTJhMiAyIDAgMDAwIDItdjE0YTItMiAwIDAwMC0yeiIgZmlsbD0iIzAwYmQ0NCIvPjxwYXRoIGQ9Ik04LjUgMTMuNWwyLjUgMy4wMUwxNC41IDEybDQuNSA2SDVsMy41LTQuNXoiIGZpbGw9IiMwMGJkNDQiLz48L3N2Zz4=";
+                }
+
+                updateSpeciesTable(boxes);
+            };
+            img.src = URL.createObjectURL(file);
+        }
+
+        function updateSpeciesTable(boxes) {
+            speciesTableBody.innerHTML = '';
+            const counts = {};
+            boxes.forEach(box => {
+                counts[box.label] = (counts[box.label] || 0) + 1;
+            });
+
+            Object.entries(counts).forEach(([species, count]) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><img src="placeholder.jpg" alt="${species}"></td>
+                    <td>${species}</td>
+                    <td>${species}</td> <!-- confidence is undefined here -->
+                    <td>${(box.confidence * 100).toFixed(1)}%</td>
+                    <td>${count}</td>
+                `;
+                speciesTableBody.appendChild(row);
+            });
+
+            totalSpeciesSpan.textContent = `Total species detected: ${Object.keys(counts).length}`;
+            totalOrganismsSpan.textContent = `Total organisms counted: ${boxes.length}`;
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            checkLoginStatus();
+            loadModels();
+        });
+    </script>
+</body>
+</html>

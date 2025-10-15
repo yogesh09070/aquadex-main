@@ -1,0 +1,48 @@
+/* Light Theme */
+.light-theme {
+  --bg-color: #ffffff;
+  --text-color: #000000;
+  --card-bg: #f4f4f4;
+  --nav-bg: #e0e0e0;
+  --btn-bg: #007BFF;
+  --btn-text: #ffffff;
+}
+
+/* Dark Theme */
+.dark-theme {
+  --bg-color: #00334e;
+  --text-color: #ffffff;
+  --card-bg: #e6f0fa;
+  --nav-bg: #002a44;
+  --btn-bg: #00bcd4;
+  --btn-text: #002a44;
+}
+
+/* Apply theme variables globally */
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+.navbar {
+  background-color: var(--nav-bg);
+}
+
+.card {
+  background-color: var(--card-bg);
+}
+
+.btn-primary {
+  background-color: var(--btn-bg);
+  color: var(--btn-text);
+}
+
+/* Optional: style theme toggle button */
+.theme-btn {
+  background: none;
+  border: 1px solid var(--btn-bg);
+  color: var(--btn-text);
+  padding: 5px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}

@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en" class="dark-theme">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AquaDex</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+  <script src="{{ url_for('static', filename='js/theme.js') }}" defer></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    .user-greeting {
+      margin-left: 20px;
+      font-weight: bold;
+      color: #f3f3f3;
+    }
+
+    .profile-icon {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background-color: transparent;
+      border: none;
+      cursor: pointer;
+    }
+
+    .profile-icon img {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+    }
+
+    .sign-in-btn {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      cursor: pointer;
+      font-size: 14px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="logo">
+      <img src="{{ url_for('static', filename='images/logo.png') }}" alt="AquaDex Logo">
+      <span>AquaDex</span>
+    </div>
+      
+    <nav>
+      <a href="{{ url_for('home') }}" class="active">Home</a>
+      <a href="{{ url_for('analysis_page') }}">Analysis</a>
+      <a href="{{ url_for('database') }}">Database</a>
+      <a href="{{ url_for('history') }}">History</a>
+    </nav>
+
+    <!-- Greeting / Auth buttons -->
+    <div class="auth-controls">
+      <span id="greeting" class="user-greeting"></span>
+      <button id="signInBtn" class="sign-in-btn">Sign In</button>
+      <button id="profileBtn" class="profile-icon">
+        <img src="{{ url_for('static', filename='images/icon1.jpg') }}" alt="Profile Icon" />
+      </button>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-content">
+      <h1>Seeing the unseen in our seas</h1>
+      <p>Discover the unseen ocean — AquaDex uses AI-powered microscopy to detect, classify, and catalog marine microorganisms in real time, empowering researchers and educators to monitor aquatic biodiversity with precision.</p>
+    </div>
+  </section>
+
+  <!-- Stats row -->
+  <section class="stats">
+    <div class="stat-card">
+      <h2>12,847</h2>
+      <p>Detected Organisms</p>
+    </div>
+    <div class="stat-card">
+      <h2>2,156</h2>
+      <p>Unique Species</p>
+    </div>
+    <div class="stat-card">
+      <h2>94.2%</h2>
+      <p>Average Confidence</p>
+    </div>
+  </section>
+
+  <!-- Organism Table -->
+  <section class="organism-table">
+    <div class="table-controls">
+      <input type="text" placeholder="Search organisms...">
+      <select>
+        <option>Sort by Count</option>
+        <option>Sort by Confidence</option>
+        <option>Sort by Size</option>
+      </select>
+      <button>Filter</button>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Thumbnail</th>
+          <th>Organism</th>
+          <th>Count</th>
+          <th>Size</th>
+          <th>Confidence</th>
+          <th>Category</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><img src="{{ url_for('static', filename='images/coscinodiscus.jpg') }}" alt="Thumb"></td>
+          <td>Coscinodiscus </td>
+          <td>12</td>
+          <td>104 μm</td>
+          <td>89%</td>
+          <td>Phytoplankton</td>
+        </tr>
+        <tr>
+          <td><img src="{{ url_for('static', filename='images/copepod.jpg') }}" alt="Thumb"></td>
+          <td>Copepod </td>
+          <td>6</td>
+          <td>250 μm</td>
+          <td>92%</td>
+          <td>Zooplankton</td>
+        </tr>
+        <tr>
+          <td><img src="{{ url_for('static', filename='images/diatomjpg.jpg') }}" alt="Thumb"></td>
+          <td>Diatom </td>
+          <td>31</td>
+          <td>45 μm</td>
+          <td>81%</td>
+          <td>Phytoplankton</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="pagination">
+      <button>Prev</button>
+      <button class="active">1</button>
+      <button>2</button>
+      <button>Next</button>
+    </div>
+  </section>
+
+  <!-- Recent Samples -->
+  <section class="recent-samples">
+    <h2>Recent Samples</h2>
+    <div class="sample-cards">
+      <div class="sample-card">
+        <img src="{{ url_for('static', filename='images/PlanktonSampleA.png') }}" alt="Sample">
+        <h4>Plankton Sample A</h4>
+        <p>2 hours ago · 23 organisms · 96.8%</p>
+      </div>
+      <div class="sample-card">
+        <img src="{{ url_for('static', filename='images/costalwater.png') }}" alt="Sample">
+        <h4>Coastal Water B</h4>
+        <p>5 hours ago · 31 organisms · 91.4%</p>
+      </div>
+      <div class="sample-card">
+        <img src="{{ url_for('static', filename='images/deepwater.png') }}" alt="Sample">
+        <h4>Deep Sea Sample</h4>
+        <p>1 day ago · 18 organisms · 89.2%</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-section">
+      <h4>Marine Organism Dex</h4>
+      <p>AI-powered detection and classification of aquatic biodiversity.</p>
+    </div>
+    <div class="footer-section">
+      <h4>Features</h4>
+      <p>Real-time Analysis<br>Database Access<br>Reports</p>
+    </div>
+    <div class="footer-section">
+      <h4>Support</h4>
+      <p>Documentation<br>Help Center<br>Community</p>
+    </div>
+    <div class="footer-section">
+      <h4>Connect</h4>
+      <p>Twitter · LinkedIn</p>
+    </div>
+  </footer>
+
+  <script>
+    const username = localStorage.getItem("user");
+    const greeting = document.getElementById("greeting");
+    const signInBtn = document.getElementById("signInBtn");
+    const profileBtn = document.getElementById("profileBtn");
+
+    if (username) {
+      greeting.textContent = `Welcome, ${username}`;
+      greeting.style.display = "inline-block";
+      profileBtn.style.display = "flex";
+      signInBtn.style.display = "none";
+
+      profileBtn.addEventListener("click", () => {
+        window.location.href = "{{ url_for('profile') }}";
+      });
+    } else {
+      greeting.style.display = "none";
+      profileBtn.style.display = "none";
+      signInBtn.style.display = "inline-block";
+
+      signInBtn.addEventListener("click", () => {
+        window.location.href = "{{ url_for('signin') }}";
+      });
+    }
+  </script>
+</body>
+</html>

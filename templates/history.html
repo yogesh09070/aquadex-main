@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>History - AquaDex</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <header class="navbar">
+        <div class="logo" onclick="location.href='{{ url_for('index') }}'">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="AquaDex Logo">
+            <span>AquaDex</span>
+        </div>
+        <nav style="position: absolute; left: 50%; transform: translateX(-50%); ">
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('analysis_page') }}">Analysis</a>
+            <a href="{{ url_for('database') }}">Database</a>
+            <a href="{{ url_for('history') }}" class="active">History</a>
+        </nav>
+        <div class="auth-controls">
+            <div class="profile-container" onclick="location.href='{{ url_for('profile') }}'">
+                <img src="{{ url_for('static', filename='images/icon1.jpg') }}" alt="Profile" class="profile-icon">
+            </div>
+        </div>
+    </header>
+
+    <div style="padding: 120px 20px; text-align: center;">
+        <h1>Analysis History</h1>
+        <p>View your previous analysis results - Coming Soon!</p>
+        <a href="{{ url_for('analysis_page') }}" style="color: #00bcd4; text-decoration: none;">← Back to Analysis</a>
+    </div>
+</body>
+</html>
